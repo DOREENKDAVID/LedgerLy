@@ -1,0 +1,32 @@
+﻿Analyzing ledgerly_v3...                                        
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\widgets\buttons\ledgerly_button.dart:51:34 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\core\widgets\buttons\secondary_button.dart:40:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\core\widgets\buttons\secondary_button.dart:43:24 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\widgets\cards\ledgerly_card.dart:51:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\widgets\cards\ledgerly_card.dart:58:41 - deprecated_member_use
+   info - Dangling library doc comment - lib\core\widgets\widgets.dart:1:1 - dangling_library_doc_comments
+   info - The private field _obscurePassword could be 'final' - lib\features\auth\login_screen.dart:21:8 - prefer_final_fields
+warning - The value of the field '_obscurePassword' isn't used - lib\features\auth\login_screen.dart:21:8 - unused_field
+   info - Use 'const' with the constructor to improve performance - lib\features\auth\login_screen.dart:232:49 - prefer_const_constructors
+   info - Unnecessary use of 'toList' in a spread - lib\features\auth\screens\business_setup_screen.dart:39:66 - unnecessary_to_list_in_spreads
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\screens\business_setup_screen.dart:67:39 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\auth\screens\onboarding_screen.dart:47:49 - prefer_const_constructors
+warning - Unused import: 'dart:async' - lib\features\auth\screens\otp_verification_screen.dart:1:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\screens\password_reset_success_screen.dart:33:52 - deprecated_member_use
+  error - Undefined name '_isFormValid' - lib\features\auth\screens\set_new_password_screen.dart:23:7 - undefined_identifier
+   info - Use 'const' with the constructor to improve performance - lib\features\auth\screens\set_new_password_screen.dart:123:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\auth\screens\set_new_password_screen.dart:125:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\auth\screens\set_new_password_screen.dart:127:28 - prefer_const_constructors
+  error - Undefined name '_isFormValid' - lib\features\auth\screens\set_new_password_screen.dart:139:28 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\screens\sign_up_screen.dart:124:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\screens\signup_business_screen.dart:85:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\screens\signup_products_screen.dart:135:52 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\auth\screens\signup_products_screen.dart:137:28 - prefer_const_constructors
+   info - Statements in an if should be enclosed in a block - lib\features\home\screens\end_of_day_screen.dart:66:17 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\home\screens\product_setup_screen.dart:55:21 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\home\screens\product_setup_screen.dart:70:21 - curly_braces_in_flow_control_structures
+   info - Use 'const' with the constructor to improve performance - lib\features\navigation\ledgerly_bottom_nav.dart:25:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\navigation\ledgerly_bottom_nav.dart:27:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\navigation\ledgerly_bottom_nav.dart:28:16 - prefer_const_constructors
+

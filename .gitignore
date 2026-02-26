@@ -1,0 +1,53 @@
+# Flutter/Dart
+.dart_tool/
+.buildlog/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+.idea/
+.vscode/
+*.iml
+*.log
+
+# Android
+/android/app/debug.keystore
+/android/.gradle/
+.android/
+build/
+captures/
+.externalNativeBuild/
+
+# iOS
+ios/Flutter/Flutter.podspec
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.podspec
+
+# VS Code & JetBrains
+.vscode/
+.idea/
+
+# Generated files
+build/
+**/build/
+**/.dart_tool/
+**/.packages
+
+# Mac
+.DS_Store
+
+# Node backend
+backend/node_modules/
+backend/package-lock.json
+backend/.env
+backend/.DS_Store
+backend/build/
+
+# Logs
+*.log
