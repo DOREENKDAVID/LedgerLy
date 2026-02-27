@@ -1,26 +1,26 @@
 {
   "development": {
-    "username": "root",
-    "password": "techDev2025!",
-    "database": "financial_acc",
-    "host": "127.0.0.1",
+    "username": "${DB_USERNAME}",
+    "password": "${DB_PASSWORD}",
+    "database": "${DB_NAME}",
+    "host": "${DB_HOST}",
     "dialect": "mysql",
-    "port": 3306
+    "port": "${DB_PORT}"
   },
   "test": {
-    "username": "root",
-    "password": "techDev2025!",
-    "database": "financial_acc_test",
-    "host": "127.0.0.1",
+    "username": "${DB_USERNAME}",
+    "password": "${DB_PASSWORD}",
+    "database": "${DB_NAME_TEST}",
+    "host": "${DB_HOST}",
     "dialect": "mysql",
-    "port": 3306
+    "port": "${DB_PORT}"
   },
   "production": {
-    "username": "root",
-    "password": "techDev2025!",
-    "database": "financial_acc_prod",
-    "host": "127.0.0.1",
+    "username": "${DB_USERNAME}",
+    "password": "${DB_PASSWORD}",
+    "database": "${DB_NAME_PROD}",
+    "host": "${DB_HOST}",
     "dialect": "mysql",
-    "port": 3306
+    "port": "${DB_PORT}"
   }
 }
