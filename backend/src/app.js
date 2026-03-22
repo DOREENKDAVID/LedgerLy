@@ -16,8 +16,8 @@ app.use(express.json());
 // ✅ Allow frontend
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://10.0.2.2:5000'], 
-    credentials: true,
+    origin: '*', // Allow all origins (for development)
+    // credentials: true,
   })
 );
 
