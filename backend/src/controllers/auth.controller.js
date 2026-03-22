@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import User from '../models/user.model.js';
+import Business from '../models/business.model.js';
 import auth from '../middleware/auth.js';
 import { sendResetEmail, sendVerificationEmail } from "../utils/sendEmail.js";
 import dotenv from 'dotenv';
@@ -12,53 +13,48 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Log the login attempt (safe: don't log password)
-    console.log('POST /auth/login', { email });
-
-    // 1️⃣ Validate input
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password required' });
+      return res.status(400).json({ message: 'Email and password are required' });
     }
 
-
-    // 2️⃣ Find user in database
     const user = await User.findOne({ where: { email } });
-
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // 3️⃣ Compare entered password with hashed password in DB
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // 4️⃣ Generate JWT
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || process.env.JWT_EXPIRES_IN }
-    );
+    // Check if user has a business registered
+    const userBusiness = await Business.findOne({ where: { userId: user.id } });
+    const firstTime = !userBusiness; // firstTime = true if no business
 
-    // 5️⃣ Send response: include a `firstTime` flag if useful for frontend routing
-    const firstTime = user.emailVerified === false;
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN || '1d',
+    });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Login successful',
       token,
-      firstTime
+      firstTime,
+      user: {
+        id: user.id,
+        email: user.email
+      },
+      business: userBusiness ? {
+        id: userBusiness.id,
+        businessName: userBusiness.businessName,
+        businessType: userBusiness.businessType
+      } : null
     });
 
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Failed to login' });
+    console.error('LOGIN ERROR:', error);
+    return res.status(500).json({ message: 'Something went wrong during login' });
   }
 };
-
-
-
 const register = async (req, res) => {
   try {
     const { email, password } = req.body;

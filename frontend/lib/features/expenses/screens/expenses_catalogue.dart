@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class ExpensesCatalogueScreen extends StatefulWidget {
   const ExpensesCatalogueScreen({super.key});
 
@@ -206,6 +207,25 @@ class _ExpensesCatalogueScreenState
         currentIndex: 3,
         selectedItemColor: Colors.teal,
         unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/products');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/log');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/expenses');
+              break;
+            case 4:
+              Navigator.pushNamed(context, '/profile');
+              break;
+          }
+        },
         items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),

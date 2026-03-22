@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ledgerly_v3/core/theme/app_colors.dart';
-import 'package:ledgerly_v3/core/widgets/buttons/buttons.dart';
 import 'package:ledgerly_v3/core/services/api_service.dart';
+import 'package:ledgerly_v3/features/business/screens/business_success_screen.dart';
 
 class BusinessScreen extends StatefulWidget {
   const BusinessScreen({super.key});
@@ -12,34 +12,21 @@ class BusinessScreen extends StatefulWidget {
 }
 
 class _BusinessScreenState extends State<BusinessScreen> {
-  final _fullNameController = TextEditingController();
-  final _phoneNumberController = TextEditingController();
-  final _businessNameController = TextEditingController();
-  String? _selectedBusinessType;
+  final TextEditingController _businessNameController = TextEditingController();
   bool _isLoading = false;
-
-  final List<Map<String, String>> _businessTypes = [
-    {'value': 'physical', 'label': 'Physical retail location', 'title': 'Shop'},
-    {'value': 'Online', 'label': 'E-commerce or social media', 'title': 'Online Seller'},
-    {'value': 'Hybrid(online & physical)', 'label': 'Multi-channel business', 'title': 'Both Online & Physical'},
-    {'value': 'open market', 'label': 'Market stall or outdoor vendor', 'title': 'Open Market'},
-  ];
 
   @override
   void dispose() {
-    _fullNameController.dispose();
-    _phoneNumberController.dispose();
     _businessNameController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleSubmit() async {
-    if (_fullNameController.text.isEmpty ||
-        _phoneNumberController.text.isEmpty ||
-        _businessNameController.text.isEmpty ||
-        _selectedBusinessType == null) {
+  Future<void> _handleContinue() async {
+    if (_isLoading) return; // ✅ prevent double click
+
+    if (_businessNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
+        const SnackBar(content: Text('Enter business name')),
       );
       return;
     }
@@ -47,147 +34,193 @@ class _BusinessScreenState extends State<BusinessScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Call backend API to save business details
-      final res = await ApiService.post('/v1/business', 
-        body: {
-          'fullName': _fullNameController.text.trim(),
-          'phoneNumber': _phoneNumberController.text.trim(),
-          'businessName': _businessNameController.text.trim(),
-          'businessType': _selectedBusinessType,
-        },
-        auth: true,
+      final response = await ApiService.addBusiness({
+        'businessName': _businessNameController.text.trim(),
+        'businessType': 'Shop',
+      });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BusinessSuccessScreen(
+            businessId: response['userBusiness']['id']
+                .toString(), // pass the ID from API response
+          ),
+        ),
       );
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res['message'] ?? 'Business setup complete!')),
-      );
-      Navigator.pushReplacementNamed(context, '/products-intro');
     } catch (e) {
-      if (!mounted) return;
-      final msg = e is Exception ? e.toString().replaceFirst('ApiException: ', '') : 'Error: $e';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
+        SnackBar(content: Text(e.toString())),
       );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final buttonHeight =
+        screenWidth * 0.12; // Adjust button height based on screen width
+    final buttonWidth =
+        screenWidth * 0.4; // Adjust button width based on screen width
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text('Tell us about your business', style: GoogleFonts.inter(color: AppColors.textDark)),
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 12),
-              Text('Full name', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _fullNameController,
-                decoration: InputDecoration(
-                  hintText: 'Your full name',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              const SizedBox(height: 16),
+
+              // 🔹 Progress bar (2 steps filled)
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTeal,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTeal,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 40),
+
+              // 🔹 Title
+              Text(
+                "What’s your business called?",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
                 ),
               ),
-              const SizedBox(height: 16),
-              Text('Phone number', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _phoneNumberController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  hintText: '+234 800 000 0000',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+
+              const SizedBox(height: 32),
+
+              // 🔹 Label
+              Text(
+                "Loading...",
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 16),
-              Text('Business name', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+
+              Text(
+                "Loading...",
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
               const SizedBox(height: 8),
+
+              // 🔹 Input
               TextField(
                 controller: _businessNameController,
                 decoration: InputDecoration(
-                  hintText: 'e.g. John\'s Store',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  hintText: "e.g., Mama T’s Grocery",
+                  hintStyle: TextStyle(color: Colors.grey.shade500),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),
-              Text('Shop type', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
-              const SizedBox(height: 4),
-              Text(
-                'This helps LedgerLy give you insights that match your shop type.',
-                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textGrey),
-              ),
-              const SizedBox(height: 12),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.1,
+
+              const SizedBox(height: 20),
+
+              // 🔹 Info box
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Colors.blue.shade100),
                 ),
-                itemCount: _businessTypes.length,
-                itemBuilder: (ctx, idx) {
-                  final type = _businessTypes[idx];
-                  final isSelected = _selectedBusinessType == type['value'];
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedBusinessType = type['value']),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: isSelected ? AppColors.primaryTeal : AppColors.borderGrey,
-                          width: isSelected ? 2 : 1,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        color: isSelected ? AppColors.primaryTeal.withOpacity(0.05) : Colors.white,
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "You can change this anytime in your profile.",
+                        style: GoogleFonts.inter(fontSize: 13),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              type['title']!,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected ? AppColors.primaryTeal : AppColors.textDark,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              type['label']!,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: AppColors.textGrey,
-                              ),
-                            ),
-                          ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const Spacer(),
+
+              // 🔹 Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Back'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.textDark,
+                        textStyle: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                  );
-                },
+                  ),
+                  SizedBox(
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    child: ElevatedButton(
+                      onPressed: _handleContinue,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryTeal,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        textStyle: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      child: const Text('Continue'),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 28),
-              LedgerlyButton(
-                label: 'Continue',
-                isLoading: _isLoading,
-                onPressed: _isLoading ? null : _handleSubmit,
-              ),
+
+              const SizedBox(height: 16),
             ],
           ),
         ),

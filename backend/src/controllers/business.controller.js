@@ -1,28 +1,30 @@
- import Business from '../models/business.model.js'
+import Business from '../models/business.model.js'
 
 const addBusiness = async (req,res)=>{
- const {fullName, phoneNumber, businessName, businessType} = req.body
+ const { businessName, businessType } = req.body
  const userId = req.user.id
  
  // Validate required fields
- if (!fullName || !phoneNumber || !businessName || !businessType) {
-   return res.status(400).json({ message: 'All fields (fullName, phoneNumber, businessName, businessType) are required' })
+ if (!businessName || !businessType) {
+   return res.status(400).json({ message: 'All fields (businessName, businessType) are required' })
  }
  
- // Validate phone number format (numbers and + only)
- const phoneRegex = /^[0-9+]+$/;
- if (!phoneRegex.test(phoneNumber)) {
-   return res.status(400).json({ message: 'Phone number must contain only numbers and + symbol' })
+ // Validate businessType
+ const validBusinessTypes = ['Shop', 'Online Seller', 'Both Online & Physical'];
+ if (!validBusinessTypes.includes(businessType)) {
+   return res.status(400).json({ message: 'Invalid business type' })
  }
  
  try {
-   const userbusiness = await Business.create({
-    fullName, phoneNumber, businessName, businessType, userId
+   const userBusiness = await Business.create({
+    businessName,
+    businessType,
+    userId
    })
-   console.log('Business created:', { businessId: userbusiness.id, userId, businessName });
+   console.log('Business created:', { businessId: userBusiness.id, userId, businessName });
    res.status(201).json({
      message: 'Business created successfully',
-     ...userbusiness.toJSON()
+     userBusiness
    })  
  } catch (error) {
     console.error('addBusiness error:', error);
@@ -83,9 +85,31 @@ const updateBusiness = async (req, res) => {
   }
 };
 
+const getBusinessById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const business = await Business.findOne({ where: { id, userId: req.user.id } });
+
+    if (!business) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    // Format the response to include only businessName and businessType
+    res.status(200).json({
+      message: 'Business retrieved successfully',
+      business: {
+        businessName: business.businessName,
+        businessType: business.businessType,
+      },
+    });
+  } catch (error) {
+    console.error('getBusinessById error:', error);
+    res.status(500).json({ message: 'Failed to retrieve business' });
+  }
+};
+
  
-export {addBusiness, findAllBusiness, deleteBusiness, updateBusiness}
- 
+export {addBusiness, findAllBusiness, deleteBusiness, updateBusiness, getBusinessById}
 
 
- 
+

@@ -24,6 +24,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool _isLoginSelected = false; // Toggle between Login/Register
   bool _isEmailError = false; // Used to simulate the "Account already exists" edge case
+  bool _isLoading = false; // Loading state
 
   @override
   void initState() {
@@ -226,37 +227,42 @@ class _SignupScreenState extends State<SignupScreen> {
               // 4. Action Button
               LedgerlyButton(
                 label: _isLoginSelected ? "Login" : "Sign UP",
-                onPressed: () async {
-                  Analytics.instance.logEvent('signup_action', {'mode': _isLoginSelected ? 'login' : 'register'});
-                  final auth = Provider.of<AuthProvider>(context, listen: false);
-                  if (_isLoginSelected) {
-                    try {
-                      await auth.login(_emailController.text.trim(), _passwordController.text.trim());
-                      if (!mounted) return;
-                      Navigator.pushReplacementNamed(context, '/dashboard');
-                    } catch (e) {
-                      final msg = (e is Exception) ? e.toString().replaceFirst('ApiException: ', '') : 'Login failed';
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-                    }
-                  } else {
-                    // Register flow: call register then navigate to OTP verification screen
-                    try {
-                      final res = await auth.register(_emailController.text.trim(), _passwordController.text.trim());
-                      if (!mounted) return;
-                      // Navigate to OTP verification screen and pass the email
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => OtpVerificationScreen(
-                          email: _emailController.text.trim(),
-                          password: _passwordController.text.trim(),
-                        )),
-                      );
-                    } catch (e) {
-                      final msg = (e is Exception) ? e.toString().replaceFirst('ApiException: ', '') : 'Registration failed';
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-                    }
-                  }
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        // Immediately disable the button
+                        final wasLoading = _isLoading;
+                        setState(() => _isLoading = true);
+
+                        if (wasLoading) return; // Prevent duplicate presses
+
+                        try {
+                          Analytics.instance.logEvent('signup_action', {'mode': _isLoginSelected ? 'login' : 'register'});
+                          final auth = Provider.of<AuthProvider>(context, listen: false);
+                          if (_isLoginSelected) {
+                            await auth.login(_emailController.text.trim(), _passwordController.text.trim());
+                            if (!mounted) return;
+                            Navigator.pushReplacementNamed(context, '/dashboard');
+                          } else {
+                            final res = await auth.register(_emailController.text.trim(), _passwordController.text.trim());
+                            if (!mounted) return;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OtpVerificationScreen(
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text.trim(),
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          final msg = (e is Exception) ? e.toString().replaceFirst('ApiException: ', '') : 'Action failed';
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                        } finally {
+                          setState(() => _isLoading = false);
+                        }
+                      },
               ),
               const SizedBox(height: 32),
 

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:ledgerly_v3/core/theme/app_colors.dart';
 import 'package:ledgerly_v3/core/widgets/buttons/buttons.dart';
-import 'package:ledgerly_v3/features/auth/login_screen.dart';
 import 'package:ledgerly_v3/features/auth/screens/sign_up_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -49,6 +47,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  void _skipOnboarding() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const SignupScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,15 +65,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
-                onPressed: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                ),
-                child: Text(
+                onPressed: _skipOnboarding,
+                child: const Text(
                   "Skip",
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w500,
+                    fontFamily: 'Inter',
                   ),
                 ),
               ),
@@ -129,7 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             _onboardingData[index]["subtitle"]!,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14,
               color: AppColors.textGrey,
               height: 1.5,
@@ -141,12 +144,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildColoredTitle(int index) {
-    final baseStyle = GoogleFonts.inter(
+    final baseStyle = TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
       color: AppColors.primaryTeal,
     );
-    final highlightStyle = GoogleFonts.inter(
+    final highlightStyle = TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
       color: AppColors.accentOrange,

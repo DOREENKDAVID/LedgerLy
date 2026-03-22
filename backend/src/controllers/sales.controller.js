@@ -8,10 +8,10 @@ import Business from '../models/business.model.js'
 
 const addSale = async (req, res) => {
   try {
-    const { productName, quantity, unitPrice } = req.body; // frontend now sends productName
+    const { productName, costPriceAtSale,sellingPriceAtSale, quantitySold } = req.body; // frontend now sends productName
     const userId = req.user.id;
 
-    if (!productName || !quantity || quantity <= 0) {
+    if (!productName || !quantitySold || quantitySold <= 0) {
       return res.status(400).json({
         message: 'Product name and quantity are required, quantity must be > 0'
       });
@@ -32,24 +32,25 @@ const addSale = async (req, res) => {
     }
 
     // Check stock
-    if (quantity > product.quantity) {
+    if (quantitySold > product.quantity) {
       return res.status(400).json({ message: 'Not enough stock for this product' });
     }
 
-    const finalUnitPrice = unitPrice ?? product.sellingPrice;
-    const totalAmount = quantity * finalUnitPrice;
+    const finalUnitPrice = sellingPriceAtSale ?? product.sellingPrice;
+    const totalAmount = quantitySold * finalUnitPrice;
 
     // Create sale
     const sale = await Sale.create({
-      quantity,
-      unitPrice: finalUnitPrice,
-      totalAmount,
+      quantitySold: quantitySold,
+      costPriceAtSale: costPriceAtSale ?? product.costPrice,
+      sellingPriceAtSale: finalUnitPrice,
+      profitAtSale: totalAmount,
       productId: product.id, // store actual ID
       businessId: business.id
     });
 
     // Reduce stock
-    await product.update({ quantity: product.quantity - quantity });
+    await product.update({ quantity: product.quantity - quantitySold });
 
     res.status(201).json(sale);
   } catch (error) {

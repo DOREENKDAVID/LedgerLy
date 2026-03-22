@@ -43,205 +43,160 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     }
   }
 
-  void _saveExpense() {
+  void _saveExpense() async {
     if (selectedCategory == null || _amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select category and enter amount")),
+        const SnackBar(content: Text('Please fill all fields.')),
       );
       return;
     }
 
-    _submitExpense();
-  }
-
-  Future<void> _submitExpense() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      final response = await ApiService.post(
-        '/v2/expenses', // replace with your backend route
-        body: {
-          'category': selectedCategory,
-          'amount': double.parse(_amountController.text),
-          'note': _noteController.text,
-          'date': selectedDate.toIso8601String(),
-        },
-        auth: true,
-      );
-
-      setState(() => _isLoading = false);
+      await ApiService.post('/expenses',
+          body: {
+            'amount': _amountController.text,
+            'category': selectedCategory,
+            'date': selectedDate.toIso8601String(),
+            'note': _noteController.text,
+          },
+          auth: true);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Expense saved successfully"),
-          backgroundColor: Colors.green,
-        ),
+        const SnackBar(content: Text('Expense added successfully!')),
       );
 
-      Navigator.pop(context); // Navigate back after successful save
-      // OR navigate to another screen if needed:
-      // Navigator.pushNamed(context, '/expenses_list');
+      setState(() {
+        _amountController.clear();
+        _noteController.clear();
+        selectedCategory = null;
+        selectedDate = DateTime.now();
+      });
     } catch (e) {
-      setState(() => _isLoading = false);
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Failed to add expense: $e')),
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('EEE, MMM d').format(selectedDate);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Record Expense'),
+        title: const Text('Add Expense'),
+        centerTitle: true,
       ),
-      body: SafeArea(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            const Text(
+              'Category',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: selectedCategory,
+              items: categories
+                  .map(
+                    (category) => DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(category),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedCategory = value;
+                });
+              },
+              decoration: const InputDecoration(
+                hintText: 'Select a category',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Amount',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                hintText: 'Enter amount',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Date',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _pickDate,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    /// Category Section
-                    const Text(
-                      "What was this expense for?",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: categories.map((category) {
-                        final isSelected = selectedCategory == category;
-
-                        return ChoiceChip(
-                          label: Text(category),
-                          selected: isSelected,
-                          onSelected: (_) {
-                            setState(() {
-                              selectedCategory = category;
-                            });
-                          },
-                          selectedColor: Colors.teal.shade100,
-                          backgroundColor: Colors.grey.shade200,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// Amount Section
-                    const Text(
-                      "How much did you spend?",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _amountController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        prefixText: "₦ ",
-                        hintText: "0",
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// Date Section
-                    const Text(
-                      "When did this happen?",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: _pickDate,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(formattedDate),
-                            const Icon(Icons.calendar_today_outlined),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// Note Section
-                    const Text(
-                      "Add a note (optional)",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _noteController,
-                      maxLength: 120,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: "e.g., Prepaid electricity token",
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
-                        ),
-                        counterText: "${_noteController.text.length}/120",
-                      ),
-                      onChanged: (_) {
-                        setState(() {});
-                      },
-                    ),
+                    Text(DateFormat.yMMMd().format(selectedDate)),
+                    const Icon(Icons.calendar_today),
                   ],
                 ),
               ),
             ),
-
-            /// Save Button
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveExpense,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Save Expense",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                ),
+            const SizedBox(height: 16),
+            const Text(
+              'Note',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _noteController,
+              decoration: const InputDecoration(
+                hintText: 'Enter a note (optional)',
+                border: OutlineInputBorder(),
               ),
-            )
+            ),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _saveExpense,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Save Expense',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
           ],
         ),
       ),

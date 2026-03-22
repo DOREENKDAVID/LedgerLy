@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ledgerly_v3/core/theme/app_colors.dart';
 
-class ProductAddedScreen extends StatelessWidget {
-  const ProductAddedScreen({super.key});
+class AddProductSuccessScreen extends StatelessWidget {
+  const AddProductSuccessScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,79 +38,10 @@ class ProductAddedScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1F2A2E),
-                    ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// Subtitle
-              Text(
-                "Want to add more products to track?",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF434C4F),
                     ),
               ),
 
               const Spacer(),
-
-              /// Yes, Add Another
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryTeal,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(
-                        context, '/products/add');
-                  },
-                  child: const Text(
-                    "Yes, Add Another",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// Go to Dashboard
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: AppColors.primaryTeal,
-                      width: 1.5,
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/home',
-                      (route) => false,
-                    );
-                  },
-                  child: const Text(
-                    "No, Go to Dashboard",
-                    style: TextStyle(
-                      color: AppColors.primaryTeal,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
             ],
           ),
         ),

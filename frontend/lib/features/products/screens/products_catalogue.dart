@@ -122,9 +122,10 @@ class _ProductsCatalogueScreenState extends State<ProductsCatalogueScreen> {
                     ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryTeal,
-        onPressed: () => Navigator.pushReplacementNamed(context, '/products/add'),
+        onPressed: () => Navigator.pushNamed(context, '/products/add'),
         child: const Icon(Icons.add, color: Colors.white),
       ),
+      // Add Product Button
       bottomNavigationBar: _products.isNotEmpty
           ? Padding(
               padding: const EdgeInsets.all(16),

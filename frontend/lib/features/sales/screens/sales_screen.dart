@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ledgerly_v3/core/services/api_service.dart';
+import 'package:ledgerly_v3/features/products/screens/products_screen.dart';
 
 class SalesScreen extends StatefulWidget {
   const SalesScreen({super.key});
@@ -9,13 +10,7 @@ class SalesScreen extends StatefulWidget {
 }
 
 class _SalesScreenState extends State<SalesScreen> {
-  /// Simulated products (replace with API data)
-  final List<Map<String, dynamic>> products = [
-    {"id": 1, "name": "Casio Watch"},
-    {"id": 2, "name": "Perfume"},
-    {"id": 3, "name": "Sundress"},
-  ];
-
+  List<Map<String, dynamic>> products = [];
   int? selectedProductId;
   final TextEditingController quantityController =
       TextEditingController(text: "1");
@@ -24,12 +19,45 @@ class _SalesScreenState extends State<SalesScreen> {
 
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final response = await ApiService.get('v2/products', auth: true);
+      setState(() {
+        products = List<Map<String, dynamic>>.from(response['data'] ?? []);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load products: $e')),
+      );
+    }
+  }
+
   double get profit {
     final qty = double.tryParse(quantityController.text) ?? 0;
     final cost = double.tryParse(costPriceController.text) ?? 0;
     final sell = double.tryParse(sellingPriceController.text) ?? 0;
 
     return (sell - cost) * qty;
+  }
+
+  void _navigateToAddProduct() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) =>  AddProductFormScreen()),
+    );
+    fetchProducts(); // Refresh the product list after adding a new product
   }
 
   void _saveSale() {
@@ -87,162 +115,144 @@ class _SalesScreenState extends State<SalesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Sale")),
-      body: SafeArea(
+      appBar: AppBar(
+        title: const Text('Sales'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// PRODUCT DROPDOWN
-                    const Text("Select Product",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 12),
-
-                    DropdownButtonFormField<int>(
-                      initialValue: selectedProductId,
-                      items: products.map((product) {
-                        return DropdownMenuItem<int>(
-                          value: product["id"],
-                          child: Text(product["name"]),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedProductId = value;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// QUANTITY
-                    const Text("Quantity Sold",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 12),
-
-                    TextField(
-                      controller: quantityController,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => setState(() {}),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// COST PRICE
-                    const Text("Cost Price (per unit)",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 12),
-
-                    TextField(
-                      controller: costPriceController,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => setState(() {}),
-                      decoration: InputDecoration(
-                        prefixText: "₦ ",
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// SELLING PRICE
-                    const Text("Selling Price (per unit)",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 12),
-
-                    TextField(
-                      controller: sellingPriceController,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => setState(() {}),
-                      decoration: InputDecoration(
-                        prefixText: "₦ ",
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// PROFIT PREVIEW
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.teal.shade50,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Total Profit",
-                              style: TextStyle(fontWeight: FontWeight.w600)),
-                          Text(
-                            "₦ ${profit.toStringAsFixed(2)}",
-                            style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.teal),
+            const Text(
+              'Product',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    initialValue: selectedProductId,
+                    items: products
+                        .map(
+                          (product) => DropdownMenuItem<int>(
+                            value: product['id'],
+                            child: Text(product['name']),
                           ),
-                        ],
-                      ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedProductId = value;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      hintText: 'Select a product',
+                      border: OutlineInputBorder(),
                     ),
-                  ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _navigateToAddProduct,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('+ Add'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+
+            /// QUANTITY
+            const Text("Quantity Sold",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: quantityController,
+              keyboardType: TextInputType.number,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
 
-            /// SAVE BUTTON
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveSale,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                      : const Text("Save Sale", style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 30),
+
+            /// COST PRICE
+            const Text("Cost Price (per unit)",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: costPriceController,
+              keyboardType: TextInputType.number,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                prefixText: "₦ ",
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
                 ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            /// SELLING PRICE
+            const Text("Selling Price (per unit)",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: sellingPriceController,
+              keyboardType: TextInputType.number,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                prefixText: "₦ ",
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            /// PROFIT PREVIEW
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.teal.shade50,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Total Profit",
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    "₦ ${profit.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal),
+                  ),
+                ],
               ),
             ),
           ],

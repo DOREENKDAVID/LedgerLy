@@ -139,13 +139,15 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
         auth: true,
       );
 
+      print('API Response: $response'); // Debug log to verify response
       if (!mounted) return;
 
-      if (response['id'] != null) {
-        Navigator.pushReplacementNamed(context, '/products/add');
+      if (response['product'] != null) {
+        Navigator.pushReplacementNamed(context, '/products/success');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Failed to add product')),
+          SnackBar(
+              content: Text(response['message'] ?? 'Failed to add product')),
         );
       }
     } catch (e) {
@@ -210,7 +212,7 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
 
             /// Profit Display
             if (_costPriceController.text.isNotEmpty &&
-              _sellingPriceController.text.isNotEmpty)
+                _sellingPriceController.text.isNotEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -227,9 +229,7 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
                       _profit >= 0 ? "Profit 📈" : "Loss 📉",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _profit >= 0
-                            ? Colors.green
-                            : Colors.red,
+                        color: _profit >= 0 ? Colors.green : Colors.red,
                       ),
                     ),
                     const SizedBox(height: 8),

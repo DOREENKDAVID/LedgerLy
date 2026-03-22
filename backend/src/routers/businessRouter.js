@@ -1,24 +1,20 @@
 import express from 'express';
 import * as businessController from '../controllers/business.controller.js';
-import * as productController from '../controllers/products.controller.js';
 import auth from '../middleware/auth.js';
 
 const V1 = express.Router();
 
 
 // GET all businesses
-V1.get("/business",auth, businessController.findAllBusiness);
-// POST /users
-V1.post("/business",auth, businessController.addBusiness);
-// DELETE /users/:id
-V1.delete("/Business/:id",auth, businessController.deleteBusiness);
+V1.get('/business', auth, businessController.findAllBusiness);
+// POST a new business
+V1.post('/business', auth, businessController.addBusiness);
+// DELETE a business by ID
+V1.delete('/business/:id', auth, businessController.deleteBusiness);
+// Update a business by ID
+V1.put('/business/:id', auth, businessController.updateBusiness);
+// Get a single business by ID
+V1.get('/business/:id', auth, businessController.getBusinessById);
 
-// GET all products
-V1.get("/products",auth, productController.findAllProducts);
-// POST /users
-V1.post("/products",auth, productController.addProducts);
-// DELETE /users/:id
-V1.delete("/product/:id",auth, productController.deleteProducts);
-
-export default  V1
+export default V1
 

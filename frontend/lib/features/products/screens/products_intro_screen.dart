@@ -63,57 +63,33 @@ class ProductsIntroScreen extends StatelessWidget {
               const Spacer(),
 
               /// Add Product Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryTeal,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(
-                        context, '/products');
-                  },
-                  child: const Text(
-                    "Add Product",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/products/add');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryTeal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                child: const Text('Add Product'),
               ),
 
               const SizedBox(height: 16),
 
               /// Skip Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: AppColors.primaryTeal),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(
-                        context, '/insights');
-                  },
-                  child: const Text(
-                    "Skip",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryTeal,
-                    ),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/dashboard');
+                },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.primaryTeal),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                child: const Text('Skip'),
               ),
 
               const SizedBox(height: 32),

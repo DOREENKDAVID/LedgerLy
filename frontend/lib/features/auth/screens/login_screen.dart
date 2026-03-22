@@ -9,6 +9,8 @@ import 'package:ledgerly_v3/features/auth/widgets/auth_text_field.dart';
 import 'package:ledgerly_v3/core/services/analytics_service.dart';
 import 'package:provider/provider.dart';
 import 'package:ledgerly_v3/core/providers/auth_provider.dart';
+import 'package:ledgerly_v3/features/insights/screens/insights_screen.dart';
+import 'package:ledgerly_v3/features/business/screens/business_intro.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +22,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final bool _obscurePassword = true;
   bool _isFormValid = false;
   bool _isLoading = false;
 
@@ -56,23 +57,29 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      print('Login result: $result');
-      print('Login response: $result');
-      print('Token: ${result['token']}');
-      print('First time user: ${result['firstTime'] ?? result['first_time']}');
+
       if (!mounted) return;
 
-      // If backend returned a token, navigate. If backend indicates firstTime, navigate to business intro.
       final hasToken = result['token'] != null;
-      final firstTime = (result['firstTime'] == true || result['first_time'] == true);
+      final hasBusiness = result['firstTime'] == false; // firstTime=false means user has business
+
+      debugPrint('Login result: token=$hasToken, hasBusiness=$hasBusiness');
 
       if (hasToken) {
-        if (firstTime) {
-          print('First time user');
-          Navigator.pushReplacementNamed(context, '/business-intro');
+        if (!hasBusiness) {
+          // User has no business → onboarding
+          debugPrint('Navigating to /business-intro');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const BusinessIntroScreen()),
+          );
         } else {
-          print('Returning user');
-          Navigator.pushReplacementNamed(context, '/home');
+          // User has business → home
+          debugPrint('Navigating to /home');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -81,8 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      final message = (e is Exception) ? e.toString().replaceFirst('ApiException: ', '') : 'Login failed';
-      print('Login error: $message'); // Added detailed logging
+      final message = (e is Exception)
+          ? e.toString().replaceFirst('Exception: ', '')
+          : 'Login failed. Please try again.';
+      debugPrint('Login error: $message');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
