@@ -21,49 +21,45 @@ class _BusinessScreenState extends State<BusinessScreen> {
     super.dispose();
   }
 
-  Future<void> _handleContinue() async {
-    if (_isLoading) return; // ✅ prevent double click
+Future<void> _handleContinue() async {
+  if (_isLoading) return; // ✅ prevent double click
 
-    if (_businessNameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter business name')),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      final response = await ApiService.addBusiness({
-        'businessName': _businessNameController.text.trim(),
-        'businessType': 'Shop',
-      });
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BusinessSuccessScreen(
-            businessId: response['userBusiness']['id']
-                .toString(), // pass the ID from API response
-          ),
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
+  if (_businessNameController.text.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Enter business name')),
+    );
+    return;
   }
 
+  setState(() => _isLoading = true);
+
+  try {
+    final response = await ApiService.addBusiness({
+      'businessName': _businessNameController.text.trim(),
+      'businessType': 'Shop',
+    });
+
+    Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (context) => BusinessSuccessScreen(
+      businessId: response['userBusiness']['id'].toString(), // pass the ID from API response
+    ),
+  ),
+);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.toString())),
+    );
+  } finally {
+    setState(() => _isLoading = false);
+  }
+}
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final buttonHeight =
-        screenWidth * 0.12; // Adjust button height based on screen width
-    final buttonWidth =
-        screenWidth * 0.4; // Adjust button width based on screen width
+    final buttonHeight = screenWidth * 0.12; // Adjust button height based on screen width
+    final buttonWidth = screenWidth * 0.4; // Adjust button width based on screen width
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -117,21 +113,13 @@ class _BusinessScreenState extends State<BusinessScreen> {
 
               // 🔹 Label
               Text(
-                "Loading...",
+                "Business Name",
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
               ),
 
-              Text(
-                "Loading...",
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
-              ),
               const SizedBox(height: 8),
 
               // 🔹 Input
@@ -142,8 +130,8 @@ class _BusinessScreenState extends State<BusinessScreen> {
                   hintStyle: TextStyle(color: Colors.grey.shade500),
                   filled: true,
                   fillColor: Colors.grey.shade100,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 18),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,

@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? business;
   bool isLoading = true;
   String? errorMessage;
-  String _selectedTimeframe = 'day';
+  final String _selectedTimeframe = 'day';
 
   @override
   void initState() {
